@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HANAWORLD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,900;1,6..96,400;1,6..96,700;1,6..96,900&family=DM+Mono:wght@300;400;500&family=Noto+Serif+JP:wght@300;400;700&display=swap" rel="stylesheet">
+
+<style>
+  @font-face {
+    font-family: 'AuroraGirl';
+    src: url('uploads/AuroraGirlDemoRegular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'HackAttack';
+    src: url('uploads/hackattackbi.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'UdThin';
+    src: url('uploads/Ud Thin.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080807;
+    --fg: #f0ece4;
+    --fg-dim: rgba(240,236,228,0.45);
+    --fg-muted: rgba(240,236,228,0.22);
+    --accent: #f0ece4;
+    --serif: 'Bodoni Moda', 'Noto Serif JP', serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--serif);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  #cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--fg);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, opacity 0.2s;
+    mix-blend-mode: difference;
+  }
+  #cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(240,236,228,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease, opacity 0.2s;
+    mix-blend-mode: difference;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 2px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--fg-muted); }
+
+  /* Preloader */
+  #preloader {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  #preloader.hide { opacity: 0; visibility: hidden; }
+  .preloader-count {
+    font-family: var(--mono);
+    font-size: clamp(48px, 8vw, 120px);
+    letter-spacing: -0.04em;
+    color: var(--fg);
+    opacity: 0.15;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 28px 48px;
+    mix-blend-mode: difference;
+  }
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex; gap: 40px; list-style: none;
+  }
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .nav-links a:hover { opacity: 1; }
+
+  /* Hamburger button */
+  .nav-burger {
+    display: flex; flex-direction: column; justify-content: center;
+    gap: 5px;
+    width: 36px; height: 36px;
+    background: none; border: none;
+    cursor: none;
+    padding: 4px;
+    position: relative;
+    z-index: 210;
+  }
+  .nav-burger span {
+    display: block;
+    height: 1px;
+    background: var(--fg);
+    transform-origin: center;
+    transition: transform 0.5s cubic-bezier(0.16,1,0.3,1),
+                opacity 0.3s ease,
+                width 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .nav-burger span:nth-child(1) { width: 100%; }
+  .nav-burger span:nth-child(2) { width: 65%; }
+  .nav-burger span:nth-child(3) { width: 100%; }
+
+  .nav-burger.open span:nth-child(1) {
+    width: 100%;
+    transform: translateY(6px) rotate(45deg);
+  }
+  .nav-burger.open span:nth-child(2) {
+    opacity: 0; width: 0;
+  }
+  .nav-burger.open span:nth-child(3) {
+    width: 100%;
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  /* Full-screen menu overlay */
+  #menu-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 190;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 120px 48px 60px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1),
+                visibility 0.6s;
+  }
+  #menu-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .menu-links {
+    list-style: none;
+    margin-bottom: 60px;
+  }
+  .menu-links li {
+    overflow: hidden;
+    border-top: 1px solid var(--fg-muted);
+  }
+  .menu-links li:last-child { border-bottom: 1px solid var(--fg-muted); }
+
+  .menu-links a {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 24px 0;
+    font-size: clamp(40px, 8vw, 100px);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -0.03em;
+    font-optical-sizing: auto;
+    font-family: 'UdThin', 'Bodoni Moda', serif;
+    color: var(--fg);
+    text-decoration: none;
+    transform: translateY(110%);
+    transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), color 0.2s;
+  }
+  .menu-links a:hover { color: var(--fg-dim); }
+  .menu-links a .menu-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--fg-muted);
+    align-self: flex-start;
+    padding-top: 12px;
+  }
+
+  #menu-overlay.open .menu-links a { transform: translateY(0); }
+  #menu-overlay.open .menu-links li:nth-child(1) a { transition-delay: 0.05s; }
+  #menu-overlay.open .menu-links li:nth-child(2) a { transition-delay: 0.12s; }
+  #menu-overlay.open .menu-links li:nth-child(3) a { transition-delay: 0.19s; }
+  #menu-overlay.open .menu-links li:nth-child(4) a { transition-delay: 0.26s; }
+
+  .menu-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease 0.4s, transform 0.5s ease 0.4s;
+  }
+  #menu-overlay.open .menu-footer {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .menu-footer-links {
+    display: flex; gap: 28px; list-style: none;
+  }
+  .menu-footer-links a {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .menu-footer-links a:hover { color: var(--fg); }
+  .menu-clock {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--fg-muted);
+  }
+
+  /* Hero */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 60px;
+    overflow: hidden;
+  }
+
+  .hero-bg-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(180px, 28vw, 400px);
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(240,236,228,0.06);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+  }
+
+  .hero-status-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 48px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+  }
+  .hero-status-left { display: flex; gap: 32px; }
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero-title-wrap {
+    overflow: hidden;
+  }
+  .hero-title {
+    font-size: clamp(72px, 13vw, 200px);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.03em;
+    font-style: italic;
+    font-optical-sizing: auto;
+    font-family: 'HackAttack', 'Bodoni Moda', serif;
+  }
+  .hero-title-en {
+    display: block;
+    color: var(--fg);
+  }
+  .hero-title-jp {
+    display: block;
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(28px, 4vw, 64px);
+    font-weight: 300;
+    font-style: normal;
+    letter-spacing: 0.15em;
+    color: var(--fg-dim);
+    margin-top: 16px;
+  }
+
+  .hero-bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--fg-muted);
+  }
+  .hero-tagline {
+    max-width: 420px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--fg-dim);
+    letter-spacing: 0.04em;
+  }
+  .hero-cta {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+    border-bottom: 1px solid var(--fg-muted);
+    padding-bottom: 4px;
+    transition: border-color 0.2s;
+  }
+  .hero-cta:hover { border-color: var(--fg); }
+  .hero-cta-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+  .hero-cta:hover .hero-cta-arrow { transform: translateX(6px); }
+
+  /* Marquee */
+  .marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--fg-muted);
+    border-bottom: 1px solid var(--fg-muted);
+    padding: 18px 0;
+    background: var(--bg);
+  }
+  .marquee-track {
+    display: flex; gap: 0;
+    animation: marquee 18s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    padding: 0 40px;
+    flex-shrink: 0;
+  }
+  .marquee-sep {
+    color: var(--fg-muted);
+    padding: 0;
+    flex-shrink: 0;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* About */
+  #about {
+    padding: 160px 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .about-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 32px;
+  }
+  .about-text-large {
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-style: italic;
+    font-optical-sizing: auto;
+    font-family: 'UdThin', 'Bodoni Moda', serif;
+  }
+  .about-text-large em {
+    font-style: normal;
+    color: var(--fg-dim);
+  }
+  .about-right {
+    padding-top: 80px;
+  }
+  .about-body {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--fg-dim);
+    letter-spacing: 0.02em;
+    margin-bottom: 48px;
+  }
+  .about-tags {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    border: 1px solid var(--fg-muted);
+    padding: 6px 14px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tag:hover { color: var(--fg); border-color: var(--fg-dim); }
+
+  /* Works strip */
+  #works {
+    padding: 0 48px 160px;
+  }
+  .works-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 60px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--fg-muted);
+  }
+  .works-title {
+    font-size: clamp(42px, 6vw, 88px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    font-style: italic;
+    font-optical-sizing: auto;
+    font-family: 'UdThin', 'Bodoni Moda', serif;
+  }
+  .works-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--fg-dim);
+  }
+
+  .work-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 40px;
+    padding: 32px 0;
+    border-bottom: 1px solid var(--fg-muted);
+    cursor: pointer;
+    transition: padding-left 0.4s ease;
+    text-decoration: none;
+    color: var(--fg);
+  }
+  .work-item:hover { padding-left: 20px; }
+  .work-item:hover .work-name { color: #1a3bcc; }
+  .work-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--fg-muted);
+  }
+  .work-name {
+    font-size: clamp(22px, 3vw, 40px);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    font-optical-sizing: auto;
+  }
+  .work-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    text-align: right;
+  }
+  .work-year { display: block; }
+  .work-type { display: block; margin-top: 4px; color: var(--fg-muted); }
+
+  /* Contact */
+  #contact {
+    padding: 160px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-bg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(100px, 18vw, 260px);
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(240,236,228,0.04);
+    pointer-events: none;
+    user-select: none;
+  }
+  .contact-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 48px;
+  }
+  .contact-big {
+    font-size: clamp(52px, 9vw, 140px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-style: italic;
+    font-optical-sizing: auto;
+    font-family: 'UdThin', 'Bodoni Moda', serif;
+    margin-bottom: 60px;
+    position: relative;
+  }
+  .contact-email {
+    display: inline-flex; align-items: center; gap: 16px;
+    font-family: var(--mono);
+    font-size: clamp(14px, 2vw, 22px);
+    letter-spacing: 0.04em;
+    color: var(--fg);
+    text-decoration: none;
+    border-bottom: 1px solid var(--fg-muted);
+    padding-bottom: 8px;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .contact-email:hover { border-color: var(--fg); }
+
+  /* Footer */
+  footer {
+    padding: 32px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--fg-muted);
+  }
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+  }
+  .footer-links {
+    display: flex; gap: 28px;
+  }
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--fg); }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.22s; }
+  .reveal-delay-3 { transition-delay: 0.35s; }
+
+  /* Hero line animation */
+  .line-mask {
+    overflow: hidden;
+    display: block;
+  }
+  .line-inner {
+    display: block;
+    transform: translateY(110%);
+    transition: transform 1.1s cubic-bezier(0.16,1,0.3,1);
+  }
+  .line-inner.visible { transform: translateY(0); }
+  .line-delay-1 { transition-delay: 0.15s; }
+  .line-delay-2 { transition-delay: 0.3s; }
+
+  @media (max-width: 768px) {
+    nav { padding: 24px 24px; }
+    #menu-overlay { padding: 100px 24px 48px; }
+    #hero { padding: 0 24px 48px; }
+    #about { grid-template-columns: 1fr; gap: 40px; padding: 80px 24px; }
+    .about-right { padding-top: 0; }
+    #works { padding: 0 24px 80px; }
+    .work-item { grid-template-columns: 48px 1fr; }
+    .work-meta { display: none; }
+    #contact { padding: 80px 24px; }
+    footer { padding: 24px; flex-direction: column; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Preloader -->
+<div id="preloader">
+  <span class="preloader-count" id="preloader-num">0</span>
+</div>
+
+<!-- Nav -->
+<nav>
+  <a href="#" class="nav-logo">HANAWORLD</a>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- Full-screen overlay menu -->
+<div id="menu-overlay">
+  <ul class="menu-links">
+    <li><a href="#about" class="menu-link"><span>About</span><span class="menu-num">01</span></a></li>
+    <li><a href="#works" class="menu-link"><span>Works</span><span class="menu-num">02</span></a></li>
+    <li><a href="#contact" class="menu-link"><span>Contact</span><span class="menu-num">03</span></a></li>
+  </ul>
+  <div class="menu-footer">
+    <ul class="menu-footer-links">
+      <li><a href="https://www.instagram.com/dawg2004/" target="_blank" rel="noopener">Instagram</a></li>
+      <li><a href="#">Behance</a></li>
+      <li><a href="#">Twitter / X</a></li>
+    </ul>
+    <span class="menu-clock" id="menu-clock"></span>
+  </div>
+</div>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-bg-text" id="parallax-text">HANA</div>
+
+  <div class="hero-status-bar reveal">
+    <div class="hero-status-left">
+      <span><span class="status-dot"></span>Available for work</span>
+      <span id="live-clock">TYO —</span>
+    </div>
+    <span>© 2026</span>
+  </div>
+
+  <div class="hero-title-wrap">
+    <h1 class="hero-title">
+      <span class="line-mask">
+        <span class="line-inner hero-en">HANA<em style="font-style:italic;color:var(--fg-dim)">WORLD</em></span>
+      </span>
+      <span class="line-mask" style="margin-top:8px">
+        <span class="line-inner line-delay-1 hero-weather" style="font-family:var(--mono);font-size:clamp(12px,1.2vw,16px);font-weight:300;letter-spacing:0.18em;font-style:normal;color:var(--fg-dim)" id="weather-display">—</span>
+      </span>
+    </h1>
+  </div>
+
+  <div class="hero-bottom reveal reveal-delay-2">
+    <p class="hero-tagline">
+      Designing experiences that live at the<br>intersection of culture and craft.
+    </p>
+    <a href="#about" class="hero-cta">
+      Discover <span class="hero-cta-arrow">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee-track">
+  </div>
+</div>
+
+<!-- About -->
+<section id="about">
+  <div>
+    <p class="about-label reveal">About / 自己紹介</p>
+    <h2 class="about-text-large reveal reveal-delay-1">
+      Giving form to<br>
+      the <em>formless</em>.<br>
+      Voice to silence.
+    </h2>
+  </div>
+  <div class="about-right">
+    <p class="about-body reveal">
+      形のないものに、形を与える。<br>
+      沈黙の中に、声を見つける。<br><br>
+      東京を起点に、ブランドの核心を視覚へと翻訳する<br>
+      デザイナー／ディレクター。<br><br>
+      美しさとは表面ではなく、<br>
+      意味の密度だと信じている。
+    </p>
+    <div class="about-tags reveal reveal-delay-1">
+      <span class="tag">Brand Identity</span>
+      <span class="tag">Web Design</span>
+      <span class="tag">Art Direction</span>
+      <span class="tag">Typography</span>
+      <span class="tag">Editorial</span>
+      <span class="tag">UI/UX</span>
+    </div>
+  </div>
+</section>
+
+<!-- Works -->
+<section id="works">
+  <div class="works-header reveal">
+    <h2 class="works-title">Selected<br><em>Works</em></h2>
+    <span class="works-count">004 Projects</span>
+  </div>
+
+  <a class="work-item reveal" href="#works">
+    <span class="work-num">01</span>
+    <span class="work-name">Brand Universe</span>
+    <span class="work-meta">
+      <span class="work-year">2025</span>
+      <span class="work-type">Identity</span>
+    </span>
+  </a>
+  <a class="work-item reveal reveal-delay-1" href="#works">
+    <span class="work-num">02</span>
+    <span class="work-name">Editorial Series</span>
+    <span class="work-meta">
+      <span class="work-year">2025</span>
+      <span class="work-type">Print / Web</span>
+    </span>
+  </a>
+  <a class="work-item reveal reveal-delay-2" href="#works">
+    <span class="work-num">03</span>
+    <span class="work-name">Digital Experience</span>
+    <span class="work-meta">
+      <span class="work-year">2024</span>
+      <span class="work-type">Web / UX</span>
+    </span>
+  </a>
+  <a class="work-item reveal reveal-delay-3" href="#works">
+    <span class="work-num">04</span>
+    <span class="work-name">Visual Language</span>
+    <span class="work-meta">
+      <span class="work-year">2024</span>
+      <span class="work-type">Art Direction</span>
+    </span>
+  </a>
+</section>
+
+<!-- Contact -->
+<section id="contact">
+  <div class="contact-bg">HELLO</div>
+  <p class="contact-label reveal">Contact / お問い合わせ</p>
+  <h2 class="contact-big reveal">
+    Let's create<br>
+    something<br>
+    <em>together.</em>
+  </h2>
+  <a href="mailto:hello@hanaworld.jp" class="contact-email reveal reveal-delay-1">
+    hello@hanaworld.jp <span>↗</span>
+  </a>
+</section>
+
+<!-- Footer -->
+<footer>
+  <span class="footer-copy">© 2026 HANAWORLD — All rights reserved.</span>
+  <div class="footer-links">
+    <a href="https://www.instagram.com/dawg2004/" target="_blank" rel="noopener">Instagram</a>
+    <a href="#">Behance</a>
+    <a href="#">Twitter / X</a>
+  </div>
+</footer>
+
+<!-- React Tweaks -->
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+const TWEAK_DEFAULS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#f0ece4",
+  "bgColor": "#080807",
+  "yourName": "HANA",
+  "tagline": "Designing experiences that live at the intersection of culture and craft.",
+  "availableText": "Available for work",
+  "heroSubJP": "わたしの世界",
+  "fontSize": 100
+}/*EDITMODE-END*/;
+
+function HanaTweaks() {
+  const result = useTweaks(TWEAK_DEFAULS);
+  const tweaks = result && result.tweaks ? result.tweaks : TWEAK_DEFAULS;
+  const setTweak = result && result.setTweak ? result.setTweak : () => {};
+
+  React.useEffect(() => {
+    document.documentElement.style.setProperty('--fg', tweaks.accentColor);
+    document.documentElement.style.setProperty('--bg', tweaks.bgColor);
+    document.querySelectorAll('.hero-en').forEach(el => {
+      const hw = el.innerHTML.replace(/^[^<]+/, tweaks.yourName);
+      el.textContent = tweaks.yourName + 'WORLD';
+    });
+    const tagEl = document.querySelector('.hero-tagline');
+    if (tagEl) {
+      const lines = tagEl.querySelectorAll('br');
+      // just update last text
+    }
+    document.querySelector('.status-dot')?.parentNode && (document.querySelector('.status-dot').parentNode.lastChild.textContent || null);
+  }, [tweaks]);
+
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection title="Identity">
+        <TweakText label="Your Name" value={tweaks.yourName} onChange={v => setTweak('yourName', v)} />
+        <TweakText label="Hero Sub (JP)" value={tweaks.heroSubJP} onChange={v => setTweak('heroSubJP', v)} />
+        <TweakText label="Status Text" value={tweaks.availableText} onChange={v => setTweak('availableText', v)} />
+      </TweakSection>
+      <TweakSection title="Colors">
+        <TweakColor label="Text Color" value={tweaks.accentColor} onChange={v => setTweak('accentColor', v)} />
+        <TweakColor label="Background" value={tweaks.bgColor} onChange={v => setTweak('bgColor', v)} />
+      </TweakSection>
+      <TweakSection title="Layout">
+        <TweakSlider label="Type Scale" min={70} max={130} step={1} value={tweaks.fontSize} onChange={v => {
+          setTweak('fontSize', v);
+          document.documentElement.style.fontSize = (v/100) + 'rem';
+        }} />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<HanaTweaks />);
+</script>
+
+<div id="tweaks-root"></div>
+
+<script>
+// Preloader
+(function() {
+  const num = document.getElementById('preloader-num');
+  const loader = document.getElementById('preloader');
+  let count = 0;
+  const interval = setInterval(() => {
+    count += Math.floor(Math.random() * 12) + 3;
+    if (count >= 100) {
+      count = 100;
+      clearInterval(interval);
+      num.textContent = count;
+      setTimeout(() => {
+        loader.classList.add('hide');
+        // Trigger hero animations
+        document.querySelectorAll('.line-inner').forEach(el => el.classList.add('visible'));
+        setTimeout(() => {
+          document.querySelectorAll('#hero .reveal').forEach(el => el.classList.add('visible'));
+        }, 300);
+      }, 300);
+    } else {
+      num.textContent = count;
+    }
+  }, 60);
+})();
+
+// Custom cursor
+(function() {
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.width = '60px';
+      ring.style.height = '60px';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+    });
+  });
+})();
+
+// Live clock — Tokyo time
+(function() {
+  function updateClock() {
+    const now = new Date();
+    const tyo = new Intl.DateTimeFormat('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false
+    }).format(now);
+    const el = document.getElementById('live-clock');
+    if (el) el.textContent = 'TYO ' + tyo;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+})();
+
+// Tokyo weather via Open-Meteo (no API key needed)
+(function() {
+  const weatherEl = document.getElementById('weather-display');
+  const WMO = {
+    0:'Clear',1:'Mainly Clear',2:'Partly Cloudy',3:'Overcast',
+    45:'Foggy',48:'Icy Fog',
+    51:'Light Drizzle',53:'Drizzle',55:'Heavy Drizzle',
+    61:'Light Rain',63:'Rain',65:'Heavy Rain',
+    71:'Light Snow',73:'Snow',75:'Heavy Snow',
+    80:'Showers',81:'Showers',82:'Heavy Showers',
+    95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'
+  };
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=35.6762&longitude=139.6503&current=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FTokyo&temperature_unit=celsius')
+    .then(r => r.json())
+    .then(data => {
+      const c = data.current;
+      const desc = WMO[c.weathercode] || 'Clear';
+      const temp = Math.round(c.temperature_2m);
+      const wind = Math.round(c.windspeed_10m);
+      if (weatherEl) {
+        weatherEl.textContent = `TOKYO — ${temp}°C  ${desc.toUpperCase()}  Wind ${wind} km/h`;
+        weatherEl.classList.add('visible');
+      }
+    })
+    .catch(() => {
+      if (weatherEl) {
+        weatherEl.textContent = 'TOKYO — Weather unavailable';
+        weatherEl.classList.add('visible');
+      }
+    });
+})();
+
+// Marquee content
+(function() {
+  const items = [
+    'Brand Identity', 'Web Design', 'Tokyo', 'Art Direction',
+    'Typography', 'Editorial', 'UI/UX', '東京', 'Creative', 'Design'
+  ];
+  const track = document.getElementById('marquee-track');
+  const html = items.map(it =>
+    `<span class="marquee-item">${it}</span><span class="marquee-item marquee-sep">—</span>`
+  ).join('');
+  track.innerHTML = html + html; // double for seamless loop
+})();
+
+// Hamburger menu
+(function() {
+  const burger = document.getElementById('nav-burger');
+  const overlay = document.getElementById('menu-overlay');
+  const menuLinks = document.querySelectorAll('.menu-link');
+  let isOpen = false;
+
+  function openMenu() {
+    isOpen = true;
+    burger.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() {
+    isOpen = false;
+    burger.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  burger.addEventListener('click', () => isOpen ? closeMenu() : openMenu());
+
+  // Close on nav link click & smooth scroll
+  menuLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      closeMenu();
+      setTimeout(() => {
+        if (target) window.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+      }, 500);
+    });
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && isOpen) closeMenu();
+  });
+
+  // Menu clock sync
+  function syncMenuClock() {
+    const now = new Date();
+    const tyo = new Intl.DateTimeFormat('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false
+    }).format(now);
+    const el = document.getElementById('menu-clock');
+    if (el) el.textContent = 'TYO ' + tyo;
+  }
+  syncMenuClock();
+  setInterval(syncMenuClock, 1000);
+})();
+
+// Parallax on scroll
+(function() {
+  const bgText = document.getElementById('parallax-text');
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (bgText) bgText.style.transform = `translate(-50%, calc(-50% + ${y * 0.25}px))`;
+  }, { passive: true });
+})();
+
+// Scroll reveal
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+})();
+</script>
+</body>
+</html>
